@@ -51,7 +51,7 @@ class BaseTelescope(object):
 
     def get_earth_location(self):
         latitude, longitude = self.get_location_lat_long()
-        return EarthLocation(lat = latitude*u.deg, lon = longitude *u.deg)
+        return EarthLocation(lat=latitude*u.deg, lon=longitude*u.deg)
 
 
     def get_ra_dec(self):
@@ -110,10 +110,6 @@ class BaseTelescope(object):
         :return: time initilizer object
         """
         return
-
-    def get_time(self):
-        _time_initializer = self.get_time_initializer()
-        return Time(_time_initializer.value, format=_time_initializer.format)
 
     def set_time_initializer(self, unix_time):
         """Configures time on telescope
