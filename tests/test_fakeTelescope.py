@@ -1,6 +1,8 @@
-from unittest import TestCase
-import simulation
 import time
+from unittest import TestCase
+
+from astroscope import simulation
+
 
 class TestFakeTelescope(TestCase):
 

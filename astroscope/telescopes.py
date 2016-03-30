@@ -28,7 +28,6 @@ class BaseTelescope(object):
         """
         self.device = device
 
-
     def cancel_current_operation(self):
         """Cancels any current operation the telescope is performing"""
         pass
@@ -134,27 +133,7 @@ class BaseTelescope(object):
         """
         pass
 
-    @staticmethod
-    def _convert_altaz_to_radec(self, _alt, _az, _location=None, _time=None):
-        if not _location:
-            _location = self._get_EarthLocation0()
-        _azel = SkyCoord(alt=_alt * u.deg, az=_az * u.deg, frame='altaz',
-                         obstime=_time, location=_location)
-        _radec = _azel.icrs
-        return _radec.ra.degree, _radec.dec.degree
-
-    def convert_azel_to_radec(self, _az, _el):
-        _time = Time.now()
-        _location = self._get_EarthLocation0()
-        return self._convert_azel_to_radec(_az, _el, _location, _time)
-
-    @staticmethod
-    def _convert_radec_to_azel(_ra, _dec, _location, _time):
-        _radec = SkyCoord(ra=_ra * u.degree, dec=_dec * u.degree, frame='icrs')
-        _azel = _radec.transform_to(AltAz(obstime=_time, location=_location))
-        return _azel.az.degree, _azel.alt.degree
-
-    def _verify_connection(self):
+    def verify_connection(self):
         pass
 
 
@@ -169,8 +148,8 @@ class BaseTelescope(object):
                         location=_location)
 
     def get_time(self):
-        _time_initializer = self.get_time_initilizer()
-        return Time(_time_initializer)
+        _time_initializer = self.get_time_initializer()
+        return Time(_time_initializer, format = self.time_format)
 
 class NexStarSLT130(BaseTelescope):
 
