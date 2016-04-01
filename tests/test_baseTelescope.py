@@ -80,3 +80,18 @@ class TestBaseTelescope(unittest.TestCase):
             radec = self.dut.get_radec()
             self.assertEqual(radec.ra.deg, 216.0)
             self.assertEqual(radec.dec.deg, 45.0)
+
+    def test_goto_altaz(self):
+        with mock.patch.object(astroscope.telescopes.BaseTelescope,
+                               'goto_alt_az') as mocked_goto_alt_az:
+            _alt, _az  = 38.0, 239.0
+            mocked_goto_alt_az.return_value =True
+            #_location = self.dut.get_earth_location()
+            _altaz = SkyCoord(alt=_alt*u.deg,
+                              az=_az*u.deg,
+                              frame="altaz")
+            self.dut.goto_altaz(_altaz)
+            mocked_goto_alt_az.assert_called_once_with(_alt, _az)
+
+
+
