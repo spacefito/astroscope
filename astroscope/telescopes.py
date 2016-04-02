@@ -21,6 +21,22 @@ class BaseTelescope(object):
     """Base class for telescope"""
     __metaclass__ = ABCMeta
 
+    @staticmethod
+    def dec_to_degrees(dec):
+        negative = False
+        if dec < 0:
+            negative = True
+            dec = dec * -1.0
+        _degrees = int(dec)
+        degrees_str = str(_degrees)+unichr(176).encode('latin-1')
+        if negative:
+            degrees_str = "-"+degrees_str
+        _minutes = (dec - _degrees) * 60
+        minutes_str = str(int(_minutes))+"'"
+        _seconds = (_minutes - int(_minutes))*60
+        seconds_str = str(int(_seconds))+'"'
+        return degrees_str + minutes_str + seconds_str
+
     def __init__(self, device="/dev/ttyUSB0"):
         """
         :param device: device which is attached to telescope. Default is "/dev/ttyUSB0"
@@ -78,14 +94,14 @@ class BaseTelescope(object):
         self.goto_ra_dec(_radec.ra.degree, _radec.dec.degree)
 
 
-    def get_alt_az(self):
+    def get_az_alt(self):
         """Gets Altitude (elevation) and azimuth telescope is pointing to
         :return: object with alt az information.
         """
         pass
 
     def get_altaz(self):
-        _alt, _az = self.get_alt_az()
+        _az, _alt = self.get_az_alt()
         return SkyCoord(alt=_alt * u.deg,
                         az=_az * u.deg,
                         frame='altaz',
@@ -131,17 +147,6 @@ class BaseTelescope(object):
 
     def verify_connection(self):
         pass
-
-
-    def get_altaz(self):
-        _alt, _az = self.get_alt_az()
-        _obstime = Time(self.get_time_initializer(), format=self.time_format)
-        _location = self.get_earth_location()
-        return SkyCoord(alt=_alt*u.deg,
-                        az=_az*u.deg,
-                        frame='altaz',
-                        obstime = _obstime,
-                        location=_location)
 
     def get_time(self):
         _time_initializer = self.get_time_initializer()
@@ -194,7 +199,7 @@ class NexStarSLT130(BaseTelescope):
         return (self._convert_hex_to_percentage_of_revolution(response[:8]),
                 self._convert_hex_to_percentage_of_revolution(response[9:17]))
 
-    def get_alt_az(self):
+    def get_az_alt(self):
         return self._get_position('z')
 
     def get_ra_dec(self):

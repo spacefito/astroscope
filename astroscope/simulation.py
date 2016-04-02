@@ -27,7 +27,7 @@ class FakeTelescope(telescopes.BaseTelescope):
     def get_ra_dec(self):
         return self._ra, self._dec
 
-    def get_alt_az(self):
+    def get_az_alt(self):
         return self._alt, self.az
 
     def cancel_current_operation(self):
