@@ -50,18 +50,18 @@ class TestBaseTelescope(unittest.TestCase):
         import time
         timestamp = time.time()
         with mock.patch.object(astroscope.telescopes.BaseTelescope,
-                               'get_alt_az') as mocked_alt_az, \
+                               'get_az_alt') as mocked_alt_az, \
                 mock.patch.object(astroscope.telescopes.BaseTelescope,
                              'get_time_initializer') as mocked_time_init, \
                 mock.patch.object(astroscope.telescopes.BaseTelescope,
                              'get_location_lat_long') as mocked_lat_long:
-            mocked_alt_az.return_value = (45.0, 89.0)
+            mocked_alt_az.return_value = (89.0, 45.0)
             mocked_time_init.return_value = timestamp
             mocked_lat_long.return_value = (38.0, -121.0)
             self.dut.time_format = 'unix'
             # dut_time = self.dut.get_time()
             dut_location = self.dut.get_earth_location()
-            _alt, _az = self.dut.get_alt_az()
+            _az, _alt = self.dut.get_az_alt()
             dut_time = self.dut.get_time()
             altaz = self.dut.get_altaz()
             reference_altaz = SkyCoord(alt=_alt * u.deg,
@@ -83,15 +83,50 @@ class TestBaseTelescope(unittest.TestCase):
 
     def test_goto_altaz(self):
         with mock.patch.object(astroscope.telescopes.BaseTelescope,
-                               'goto_alt_az') as mocked_goto_alt_az:
+                               'goto_az_alt') as mocked_goto_az_alt:
             _alt, _az  = 38.0, 239.0
-            mocked_goto_alt_az.return_value =True
-            #_location = self.dut.get_earth_location()
+            mocked_goto_az_alt.return_value =True
             _altaz = SkyCoord(alt=_alt*u.deg,
                               az=_az*u.deg,
                               frame="altaz")
             self.dut.goto_altaz(_altaz)
-            mocked_goto_alt_az.assert_called_once_with(_alt, _az)
+            mocked_goto_az_alt.assert_called_once_with(_az, _alt)
 
+    def test_goto_radec(self):
+        with mock.patch.object(astroscope.telescopes.BaseTelescope,
+                               'goto_ra_dec') as mocked_goto_ra_dec:
+            _ra, _dec = 39.0, 89.0
+            mocked_goto_ra_dec.return_value = True
+            _radec = SkyCoord(ra=_ra*u.deg, dec=_dec*u.deg, frame="icrs")
+            self.dut.goto_radec(_radec)
+            mocked_goto_ra_dec.assert_called_once_with(_ra, _dec)
+
+    def test_get_earth_location(self):
+        with mock.patch.object(astroscope.telescopes.BaseTelescope,
+                      'get_location_lat_long') as mocked_get_location_lat_long:
+            mocked_get_location_lat_long.return_value = 38.0,-121.0
+            _location = self.dut.get_earth_location()
+            self.assertEqual(_location.latitude.deg, 38.0)
+            self.assertEqual(_location.longitude.deg, -121.0)
+
+    def test_move_alt(self):
+        with mock.patch.object(astroscope.telescopes.BaseTelescope,
+                               'get_az_alt') as mocked_get_az_alt, \
+             mock.patch.object(astroscope.telescopes.BaseTelescope,
+                               'goto_az_alt') as mocked_goto_az_alt:
+            mocked_get_az_alt.return_value = 38.0, 79.0
+            mocked_goto_az_alt.return_value = True
+            self.dut.move_alt(10)
+            mocked_goto_az_alt.assert_called_once_with(38.0, 89.0)
+
+    def test_move_az(self):
+        with mock.patch.object(astroscope.telescopes.BaseTelescope,
+                               'get_az_alt') as mocked_get_az_alt, \
+             mock.patch.object(astroscope.telescopes.BaseTelescope,
+                               'goto_az_alt') as mocked_goto_az_alt:
+            mocked_get_az_alt.return_value = 38.0, 79.0
+            mocked_goto_az_alt.return_value = True
+            self.dut.move_az(10)
+            mocked_goto_az_alt.assert_called_once_with(48.0, 79.0)
 
 

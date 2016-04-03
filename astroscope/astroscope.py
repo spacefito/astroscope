@@ -42,6 +42,7 @@ def main():
     group.add_argument("--get_earth_location", action="store_true")
     group.add_argument("--get_model", action="store_true")
     group.add_argument("--get_radec", action="store_true")
+    group.add_argument("--get_ra_dec", action="store_true")
     group.add_argument("--debug_get_radec", action="store_true")
     group.add_argument("--get_time", action="store_true")
     group.add_argument("--get_tracking_mode", action="store_true")
@@ -74,7 +75,11 @@ def main():
     if args.get_azel:
         print(telescope.get_az_alt())
     elif args.debug_get_radec:
-        print(telescope.get_ra_dec())
+        import pdb
+        pdb.set_trace()
+        print(telescope.get_radec())
+    elif args.get_ra_dec:
+        print (telescope.get_ra_dec())
     elif args.get_altaz_info:
         _altaz = telescope.get_altaz()
         print(_altaz)
@@ -89,10 +94,13 @@ def main():
         print(" lat: "+telescope.dec_to_degrees(_earth_location.latitude.deg))
         print("long: "+telescope.dec_to_degrees(_earth_location.longitude.deg))
     elif args.get_earth_location:
-        print telescope.get_earth_location()
+        _location = telescope.get_earth_location()
+        print _location
     elif args.get_radec:
         _altaz = telescope.get_altaz()
-        print _altaz.icrs
+        _radec = _altaz.transform_to('icrs')
+        print " ra:" + str(_radec.ra.hms)
+        print "dec: " + str(_radec.dec.deg)
     elif args.get_tracking_mode:
         print(telescope.get_tracking_mode())
     elif args.get_version:
@@ -111,10 +119,10 @@ def main():
         #telescope.set_time_initializer(map(int, args.set_time_initializer.split(",")))
     elif args.set_tracking_mode:
         telescope.set_tracking_mode(int(args.set_tracking_mode))
-    elif args.goto_alt_az:
-        _alt = float(args.goto_alt_az[0])
-        _az = float(args.goto_alt_az[1])
-        telescope.goto_alt_az(_alt, _az)
+    elif args.goto_az_alt:
+        _alt = float(args.goto_az_alt[0])
+        _az = float(args.goto_az_alt[1])
+        telescope.goto_az_alt(_az, _alt)
     elif args.goto_in_progress:
         if telescope.goto_in_progress():
             print("Yes")

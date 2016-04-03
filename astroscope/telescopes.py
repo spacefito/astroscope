@@ -79,7 +79,8 @@ class BaseTelescope(object):
 
     def get_radec(self):
         _ra, _dec = self.get_ra_dec()
-        return SkyCoord(ra=_ra*u.deg, dec=_dec*u.deg, frame="icrs")
+        _radec = SkyCoord(ra=_ra*u.deg, dec=_dec*u.deg, frame="icrs")
+        return _radec
 
 
     def goto_ra_dec(self, _ra, _dec):
@@ -102,14 +103,15 @@ class BaseTelescope(object):
 
     def get_altaz(self):
         _az, _alt = self.get_az_alt()
-        return SkyCoord(alt=_alt * u.deg,
+        _altaz = SkyCoord(alt=_alt * u.deg,
                         az=_az * u.deg,
                         frame='altaz',
-                        obstime=self.get_time(),
+                        obstime=Time.now(),
                         location=self.get_earth_location())
+        return _altaz
 
 
-    def goto_alt_az(self, _alt, _az):
+    def goto_az_alt(self, _alt, _az):
         """Points telescope to provided Alt/Ax coodinates.
 
         :param altaz: object containinng alt/az information.
@@ -117,8 +119,18 @@ class BaseTelescope(object):
         """
         pass
 
+    def move_alt(self, degs):
+        _az, _alt = self.get_az_alt()
+        new_alt = _alt + degs
+        self.goto_az_alt(_az, new_alt)
+
+    def move_az(self, degs):
+        _az, _alt = self.get_az_alt()
+        new_az = _az + degs
+        self.goto_az_alt(new_az, _alt)
+
     def goto_altaz(self, altaz):
-        self.goto_alt_az(altaz.alt.degree, altaz.az.degree)
+        self.goto_az_alt(altaz.az.degree, altaz.alt.degree)
 
     def get_time_initializer(self):
         """ Returns an object which can be used to create a astropy.Time object
@@ -212,7 +224,7 @@ class NexStarSLT130(BaseTelescope):
         response = self.read_response(1)
         return "#" in response
 
-    def goto_alt_az(self, _alt, _az):
+    def goto_az_alt(self, _az, _alt):
         self._goto_command('b', (_az, _alt))
 
     def goto_ra_dec(self, _ra, _dec):
@@ -327,7 +339,8 @@ class NexStarSLT130(BaseTelescope):
         return date_string
 
     def get_time(self):
-        return Time(self.get_time_initializer())
+        return Time(self.get_time_initializer(),
+                    location=self.get_earth_location())
 
 
     def set_time_initializer(self, time):
