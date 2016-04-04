@@ -63,7 +63,7 @@ class TestBaseTelescope(unittest.TestCase):
             dut_location = self.dut.get_earth_location()
             _az, _alt = self.dut.get_az_alt()
             dut_time = self.dut.get_time()
-            altaz = self.dut.get_altaz()
+            altaz = self.dut.get_azalt()
             reference_altaz = SkyCoord(alt=_alt * u.deg,
                                        az=_az * u.deg,
                                        frame='altaz',

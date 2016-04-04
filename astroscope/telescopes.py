@@ -101,7 +101,7 @@ class BaseTelescope(object):
         """
         pass
 
-    def get_altaz(self):
+    def get_azalt(self):
         _az, _alt = self.get_az_alt()
         _altaz = SkyCoord(alt=_alt * u.deg,
                         az=_az * u.deg,
@@ -121,12 +121,12 @@ class BaseTelescope(object):
 
     def move_alt(self, degs):
         _az, _alt = self.get_az_alt()
-        new_alt = _alt + degs
+        new_alt = _alt + float(degs)
         self.goto_az_alt(_az, new_alt)
 
     def move_az(self, degs):
         _az, _alt = self.get_az_alt()
-        new_az = _az + degs
+        new_az = _az + float(degs)
         self.goto_az_alt(new_az, _alt)
 
     def goto_altaz(self, altaz):

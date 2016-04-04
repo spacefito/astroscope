@@ -34,22 +34,22 @@ def main():
     group.add_argument("-d",
                        help="Port telescope is connected to."
                             "Default = /dev/ttyUSB0")
-    group.add_argument("--get_altaz", action="store_true")
-    group.add_argument("--get_altaz_info", action="store_true")
+    group.add_argument("--get_azalt", action="store_true")
+    group.add_argument("--get_azalt_info", action="store_true")
     group.add_argument("--get_az_alt", action="store_true")
-    group.add_argument("--get_azel", action="store_true")
+    group.add_argument("--move_az", nargs=1, metavar="new_az")
+    group.add_argument("--move_alt", nargs = 1,  metavar="new_alt")
     group.add_argument("--get_location", action="store_true")
     group.add_argument("--get_earth_location", action="store_true")
     group.add_argument("--get_model", action="store_true")
     group.add_argument("--get_radec", action="store_true")
     group.add_argument("--get_ra_dec", action="store_true")
-    group.add_argument("--debug_get_radec", action="store_true")
     group.add_argument("--get_time", action="store_true")
     group.add_argument("--get_tracking_mode", action="store_true")
     group.add_argument("--get_version", action="store_true")
     group.add_argument("--set_location", nargs=2,
                        metavar=("latitude", "longitude"))
-    group.add_argument("--goto_alt_az", nargs=2, metavar=("alt", "az"))
+    group.add_argument("--goto_az_alt", nargs=2, metavar=("az", "alt"))
     group.add_argument("--goto_in_progress", action="store_true")
     group.add_argument("--goto_radec", nargs=2, metavar=("Ra", "Dec"))
     group.add_argument("--set_tracking_mode", metavar="tracking_mode")
@@ -61,7 +61,6 @@ def main():
     group.add_argument("--slew_fixed", nargs=2, metavar=("az_rate", "el_rate"))
     group.add_argument("--slew_var", nargs=2, metavar=("az_rate", "el_rate"))
     group.add_argument("--sync", nargs=2, metavar=("ra", "dec"))
-    group.add_argument("--move_ra", )
 
     args = parser.parse_args()
 
@@ -72,19 +71,13 @@ def main():
 
     telescope = telescopes.NexStarSLT130(device)
 
-    if args.get_azel:
-        print(telescope.get_az_alt())
-    elif args.debug_get_radec:
-        import pdb
-        pdb.set_trace()
-        print(telescope.get_radec())
-    elif args.get_ra_dec:
+    if args.get_ra_dec:
         print (telescope.get_ra_dec())
-    elif args.get_altaz_info:
-        _altaz = telescope.get_altaz()
+    elif args.get_azalt_info:
+        _altaz = telescope.get_azalt()
         print(_altaz)
-    elif args.get_altaz:
-        _altaz = telescope.get_altaz()
+    elif args.get_azalt:
+        _altaz = telescope.get_azalt()
         print("alt: " +telescope.dec_to_degrees(_altaz.alt.deg))
         print(" az: " +telescope.dec_to_degrees(_altaz.az.deg))
     elif args.get_az_alt:
@@ -94,10 +87,9 @@ def main():
         print(" lat: "+telescope.dec_to_degrees(_earth_location.latitude.deg))
         print("long: "+telescope.dec_to_degrees(_earth_location.longitude.deg))
     elif args.get_earth_location:
-        _location = telescope.get_earth_location()
-        print _location
+        print telescope.get_earth_location()
     elif args.get_radec:
-        _altaz = telescope.get_altaz()
+        _altaz = telescope.get_azalt()
         _radec = _altaz.transform_to('icrs')
         print " ra:" + str(_radec.ra.hms)
         print "dec: " + str(_radec.dec.deg)
@@ -157,14 +149,10 @@ def main():
         _ra = float(args.sync[0])
         _dec = float(args.sync[1])
         telescope.sync(_ra, _dec)
-    elif args.move_ra:
-        _radec_coordinates = telescope.get_radec()
-        print _radec_coordinates[0]
-        # then we add the integer to ra
-        # move to new ra same dec
-        # check that number if safe
-        # telescope.is_this_ra_safe(_ra)
-
+    elif args.move_alt:
+        telescope.move_alt(args.move_alt[0])
+    elif args.move_az:
+        telescope.move_az(args.move_az[0])
 
     else:
         print(parser.print_help())
