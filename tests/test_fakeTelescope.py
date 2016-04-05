@@ -32,7 +32,7 @@ class TestFakeTelescope(TestCase):
         self.assertEqual(self._test_long, _long)
 
     def test_goto_ra_dec(self):
-        self.dut.goto_radec(self._test_ra, self._test_dec)
+        self.dut.goto_ra_dec(self._test_ra, self._test_dec)
 
     def test_get_and_set_time_initializer(self):
         self.dut.get_time_initializer()

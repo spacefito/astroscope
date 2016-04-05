@@ -28,7 +28,7 @@ class FakeTelescope(telescopes.BaseTelescope):
         return self._ra, self._dec
 
     def get_az_alt(self):
-        return self._alt, self.az
+        return self._alt, self._az
 
     def cancel_current_operation(self):
         self._operation_in_progress = False
@@ -41,12 +41,12 @@ class FakeTelescope(telescopes.BaseTelescope):
         self._location_lat = _lat
         self._location_long = _long
 
-    def goto_radec(self, _ra, _dec):
+    def goto_raf_dec(self, _ra, _dec):
         self._ra = _ra
         self._dec = _dec
         self._response = "#"
 
-    def goto_altaz(self, _alt, _az):
+    def goto_az_alt(self, _az, _alt):
         self._alt = _alt
         self._az = _az
         self._response = "#"

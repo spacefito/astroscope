@@ -2,30 +2,9 @@
 import argparse
 
 from astropy import units as u
-from astropy.coordinates import AltAz
-from astropy.coordinates import EarthLocation
 from astropy.coordinates import SkyCoord
-from astropy.time import Time
 
 import telescopes
-
-
-def _get_telescope_location(telescope):
-    _latitude, _longitude = telescope.get_location()
-
-    _latitude_deg = _latitude[0] + (_latitude[1] / 60.0) + (
-        _latitude[2] / (60.0 * 60.0))
-    if _latitude[3] > 0:
-        _latitude_deg *= -1.0
-
-    _longitude_deg = _longitude[0] + (_longitude[1] / 60.0) + (
-        _longitude[2] / (60.0 * 60.0))
-    if _longitude[3] > 0:
-        _longitude_deg *= -1.0
-
-    telescope_location = EarthLocation(lat=_latitude_deg * u.deg,
-                                       lon=_longitude_deg * u.deg)
-    return telescope_location
 
 
 def main():
@@ -34,30 +13,81 @@ def main():
     group.add_argument("-d",
                        help="Port telescope is connected to."
                             "Default = /dev/ttyUSB0")
-    group.add_argument("--get_azalt", action="store_true")
-    group.add_argument("--get_azalt_info", action="store_true")
-    group.add_argument("--get_az_alt", action="store_true")
-    group.add_argument("--move_az", nargs=1, metavar="new_az")
-    group.add_argument("--move_alt", nargs = 1,  metavar="new_alt")
-    group.add_argument("--get_location", action="store_true")
-    group.add_argument("--get_earth_location", action="store_true")
-    group.add_argument("--get_model", action="store_true")
-    group.add_argument("--get_radec", action="store_true")
-    group.add_argument("--get_ra_dec", action="store_true")
-    group.add_argument("--get_time", action="store_true")
-    group.add_argument("--get_tracking_mode", action="store_true")
-    group.add_argument("--get_version", action="store_true")
+    group.add_argument("--get_azalt", action="store_true",
+                       help="Display the current values of the telescope's "
+                            "Aziumth (as) and Altitude (alt) obtained by "
+                            "creating a SkyCoord object from astorpy library.")
+    group.add_argument("--get_azalt_info", action="store_true",
+                       help="Displays the string representaion of the SkyCoord"
+                            " Astropy object created with the az and atl"
+                            " reported by the telescope.")
+    group.add_argument("--get_az_alt", action="store_true",
+                       help="Displays the values of az and alt as reported"
+                            " by the telescope.")
+    group.add_argument("--move_az_by", nargs=1, metavar="degrees",
+                       help="Moves the telescope in the Azimuth (az) axis"
+                            " by the amount provided in degrees.")
+    group.add_argument("--move_alt_by", nargs=1, metavar="degrees",
+                       help="Moves the telescope in the Alitude (alt) axis"
+                            " by the amount provided in degrees.")
+    group.add_argument("--get_location", action="store_true",
+                       help=" Displays the latitude and longitude of the "
+                            "telescope location.")
+    group.add_argument("--get_earth_location", action="store_true",
+                       help="Displays EarthLocation Astropy object "
+                            "representing the location of the telescope.")
+    group.add_argument("--get_model", action="store_true",
+                       help=" Returns model of telescope.")
+    group.add_argument("--get_radec", action="store_true",
+                       help="Displays Right Ascention (ra) and "
+                            "Declincation (dec) telescope is pointing to. It "
+                            "is obtained by creating a SkyCoord Astropy object"
+                            " from the Azimuth, Altitude, and Earth Location "
+                            "reported by the telescope.")
+    group.add_argument("--get_ra_dec", action="store_true",
+                       help="Displays the Right Ascnetion (ra) and "
+                            "Declination (dec) reported by the telescope.")
+    group.add_argument("--get_time", action="store_true",
+                       help="Displays value of Atropy Time object "
+                            "created by using the time reported by the"
+                            " telescope and the EarthLocation derived from"
+                            " latitude and longitude reported by telescope.")
+    group.add_argument("--get_tracking_mode", action="store_true",
+                       help="Displays the tracking mode value reported"
+                            " by the telescope.")
+    group.add_argument("--get_version", action="store_true",
+                       help="Displays the software version of the"
+                            "telescope.")
     group.add_argument("--set_location", nargs=2,
-                       metavar=("latitude", "longitude"))
-    group.add_argument("--goto_az_alt", nargs=2, metavar=("az", "alt"))
-    group.add_argument("--goto_in_progress", action="store_true")
-    group.add_argument("--goto_radec", nargs=2, metavar=("Ra", "Dec"))
-    group.add_argument("--set_tracking_mode", metavar="tracking_mode")
-    group.add_argument("--set_time")
-    group.add_argument("--cancel_goto", action="store_true")
-    group.add_argument("--cancel_current_operation", action="store_true")
-    group.add_argument("--alignment_complete", action="store_true")
-    group.add_argument("--echo")
+                       metavar=("latitude", "longitude"),
+                       help="Sets the latitude and longitude on the "
+                            "telescope.")
+    group.add_argument("--goto_az_alt", nargs=2, metavar=("az", "alt"),
+                       help="Sets the azimuth and altitude of the "
+                            "telescope.")
+    group.add_argument("--goto_in_progress", action="store_true",
+                       help="reports back weather or not there is an "
+                            "operation in progress on the telescope. "
+                            "For example, if the telescope is currently"
+                            " moving.")
+    group.add_argument("--goto_radec", nargs=2, metavar=("Ra", "Dec"),
+                       help="Points the telescope to the given degrees of "
+                            "Right Ascention (ra) and Declination (dec).")
+    group.add_argument("--set_tracking_mode", metavar="tracking_mode",
+                       help="Sets the tracking mode of the telescope to the"
+                            " value provided.")
+    group.add_argument("--set_time", help="Sets the time on the telescope.")
+    group.add_argument("--cancel_goto", action="store_true",
+                       help="Cancels any 'goto' operation the telescope "
+                            "is currently executing.")
+    group.add_argument("--cancel_current_operation", action="store_true",
+                       help="Cancels any operation the telescope is "
+                            "currently executing.")
+    group.add_argument("--alignment_complete", action="store_true",
+                       help="Reports back weather or not the telescope "
+                            "is aligned.")
+    group.add_argument("--echo", help="Displays provided text on "
+                                      "the telescope's display.")
     group.add_argument("--slew_fixed", nargs=2, metavar=("az_rate", "el_rate"))
     group.add_argument("--slew_var", nargs=2, metavar=("az_rate", "el_rate"))
     group.add_argument("--sync", nargs=2, metavar=("ra", "dec"))
@@ -78,14 +108,16 @@ def main():
         print(_altaz)
     elif args.get_azalt:
         _altaz = telescope.get_azalt()
-        print("alt: " +telescope.dec_to_degrees(_altaz.alt.deg))
-        print(" az: " +telescope.dec_to_degrees(_altaz.az.deg))
+        print("alt: " + telescope.dec_to_degrees(_altaz.alt.deg))
+        print(" az: " + telescope.dec_to_degrees(_altaz.az.deg))
     elif args.get_az_alt:
         print (telescope.get_az_alt())
     elif args.get_location:
         _earth_location = telescope.get_earth_location()
-        print(" lat: "+telescope.dec_to_degrees(_earth_location.latitude.deg))
-        print("long: "+telescope.dec_to_degrees(_earth_location.longitude.deg))
+        print(
+            " lat: " + telescope.dec_to_degrees(_earth_location.latitude.deg))
+        print(
+            "long: " + telescope.dec_to_degrees(_earth_location.longitude.deg))
     elif args.get_earth_location:
         print telescope.get_earth_location()
     elif args.get_radec:
@@ -108,7 +140,6 @@ def main():
         )
     elif args.set_time:
         print "broken!!!!!"
-        #telescope.set_time_initializer(map(int, args.set_time_initializer.split(",")))
     elif args.set_tracking_mode:
         telescope.set_tracking_mode(int(args.set_tracking_mode))
     elif args.goto_az_alt:
@@ -123,7 +154,8 @@ def main():
     elif args.goto_radec:
         _ra = float(args.goto_radec[0])
         _dec = float(args.goto_radec[1])
-        telescope.goto_radec(_ra, _dec)
+        _radec = SkyCoord(ra=_ra * u.deg, dec=_dec * u.deg, frame="icrs")
+        telescope.goto_radec(_radec)
     elif args.alignment_complete:
         if telescope.alignment_complete():
             print("Yes")
@@ -149,10 +181,10 @@ def main():
         _ra = float(args.sync[0])
         _dec = float(args.sync[1])
         telescope.sync(_ra, _dec)
-    elif args.move_alt:
-        telescope.move_alt(args.move_alt[0])
-    elif args.move_az:
-        telescope.move_az(args.move_az[0])
+    elif args.move_alt_by:
+        telescope.move_alt_by(args.move_alt_by[0])
+    elif args.move_az_by:
+        telescope.move_az_by(args.move_az_by[0])
 
     else:
         print(parser.print_help())
