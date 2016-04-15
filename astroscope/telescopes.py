@@ -1,10 +1,13 @@
 from abc import ABCMeta
 
 import serial
+import requests
+import Image
 from astropy import units as u
 from astropy.coordinates import EarthLocation
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
+
 
 
 class TelescopeError(Exception):
@@ -44,6 +47,19 @@ class BaseTelescope(object):
         :return:
         """
         self.device = device
+
+    def find_view_in_catalog(self, output_filename):
+        _radec = self.get_radec()
+        impix = 1024
+        imsize = 12 * u.arcmin
+        cutoutbaseurl = 'http://skyservice.pha.jhu.edu/DR12/ImgCutout/' \
+                        'getjpeg.aspx'
+        userdata= dict(ra=_radec.ra.deg,dec=_radec.dec.deg, width=impix,
+                       height=impix, scale=imsize.to(u.arcsec).value / impix)
+        resp = requests.get(cutoutbaseurl, userdata)
+        with open(output_filename, 'wb') as f:
+            for chunck in resp:
+                f.write(chunck)
 
     def cancel_current_operation(self):
         """Cancels any current operation the telescope is performing"""
@@ -162,8 +178,10 @@ class BaseTelescope(object):
         return Time(_time_initializer, format=self.time_format)
 
 
+
 class NexStarSLT130(BaseTelescope):
     time_format = 'isot'
+
 
     def __init__(self, device):
         super(NexStarSLT130, self).__init__(device)

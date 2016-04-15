@@ -41,7 +41,7 @@ class FakeTelescope(telescopes.BaseTelescope):
         self._location_lat = _lat
         self._location_long = _long
 
-    def goto_raf_dec(self, _ra, _dec):
+    def goto_ra_dec(self, _ra, _dec):
         self._ra = _ra
         self._dec = _dec
         self._response = "#"
