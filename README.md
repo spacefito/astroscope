@@ -1,6 +1,5 @@
 # astroscope
 Command line tool and libraries which integrate astropy library and telescopes.
-"this is only a test of a pull"
 The command "astropscope" is a reference python script which provides a command interface to the libraries. 
 <i><b>./astropscope -h</b></i> provides help documenation and avialable flags. 
 
