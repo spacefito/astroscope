@@ -1,0 +1,1 @@
+ gphoto2 --set-config capturetarget=0 --set-config drivemode=0 --set-config eosviewfinder=0 --set-config output=1 --set-config autofocusdrive=0 --filename test.jpg --wait-event=4s --capture-image
