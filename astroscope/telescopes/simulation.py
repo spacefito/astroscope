@@ -1,8 +1,8 @@
-import telescopes
+import astroscope.telescopes
 import time
 
 
-class FakeTelescope(telescopes.BaseTelescope):
+class FakeTelescope(astroscope.telescopes.BaseTelescope):
 
     _location_lat = 0.0
     _location_long = 0.0
