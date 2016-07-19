@@ -8,5 +8,6 @@ contain the higher level algorithms which use astropy to do astronomomical calcu
 BaseTelescope contains a few "abstract" methods which should be implemented by any particular telesope interface to be able to control
 a real telescope. The example included is based on a Celestron SLT 130 telescope from Celestron. The class is called NexStarSLT130,
 and it provides an interface to connect to the telescope via the NexStar+ handhel controller. The default connection is /dev/ttyUSB0.
+.
 
 [![astropy](http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat)](http://www.astropy.org/)
