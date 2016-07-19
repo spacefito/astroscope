@@ -4,7 +4,7 @@ import argparse
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 
-import telescopes
+import telescopes.nextstar_telescopes
 
 
 def main():
@@ -99,7 +99,7 @@ def main():
     else:
         device = '/dev/ttyUSB0'
 
-    telescope = telescopes.NexStarSLT130(device)
+    telescope = telescopes.nextstar_telescopes.NexStarSLT130(device)
 
     if args.get_ra_dec:
         print (telescope.get_ra_dec())
