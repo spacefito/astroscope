@@ -10,7 +10,7 @@ The AstropyNexStarLTS130 class under local_telescopes is a good example:
 <p>
 <p>
 <p>class AstropyNexStarSLT130(LocalComputer, AstropyTelescope, NexStarSLT130):
-<p>    pass
+
 </b>
 
 It inherits the functionality of a plain NexStarSLT130 and is augmented by functionality from the AstropyTelescope and LocalComputer
