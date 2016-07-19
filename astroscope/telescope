@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import argparse
 
-from astropy import units as u
-from astropy.coordinates import SkyCoord
 
 import telescopes.nextstar_telescopes
 
@@ -70,9 +68,6 @@ def main():
                             "operation in progress on the telescope. "
                             "For example, if the telescope is currently"
                             " moving.")
-    group.add_argument("--goto_radec", nargs=2, metavar=("Ra", "Dec"),
-                       help="Points the telescope to the given degrees of "
-                            "Right Ascention (ra) and Declination (dec).")
     group.add_argument("--set_tracking_mode", metavar="tracking_mode",
                        help="Sets the tracking mode of the telescope to the"
                             " value provided.")
@@ -151,11 +146,6 @@ def main():
             print("Yes")
         else:
             print("No")
-    elif args.goto_radec:
-        _ra = float(args.goto_radec[0])
-        _dec = float(args.goto_radec[1])
-        _radec = SkyCoord(ra=_ra * u.deg, dec=_dec * u.deg, frame="icrs")
-        telescope.goto_radec(_radec)
     elif args.alignment_complete:
         if telescope.alignment_complete():
             print("Yes")
