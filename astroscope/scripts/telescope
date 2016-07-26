@@ -2,7 +2,7 @@
 import argparse
 
 
-import telescopes.nextstar_telescopes
+import astroscope.telescopes.nextstar_telescopes
 
 
 def main():
@@ -94,7 +94,7 @@ def main():
     else:
         device = '/dev/ttyUSB0'
 
-    telescope = telescopes.nextstar_telescopes.NexStarSLT130(device)
+    telescope = astroscope.telescopes.nextstar_telescopes.NexStarSLT130(device)
 
     if args.get_ra_dec:
         print (telescope.get_ra_dec())
