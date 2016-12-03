@@ -119,12 +119,12 @@ def main():
         print(
             "long: " + telescope.dec_to_degrees(_earth_location.longitude.deg))
     elif args.get_earth_location:
-        print telescope.get_earth_location()
+        print(telescope.get_earth_location())
     elif args.get_radec:
         _altaz = telescope.get_azalt()
         _radec = _altaz.transform_to('icrs')
-        print " ra:" + str(_radec.ra.hms)
-        print "dec: " + str(_radec.dec.deg)
+        print(" ra:" + str(_radec.ra.hms))
+        print("dec: " + str(_radec.dec.deg))
     elif args.get_tracking_mode:
         print(telescope.get_tracking_mode())
     elif args.get_version:
@@ -139,7 +139,7 @@ def main():
             map(int, latitude.split(","))
         )
     elif args.set_time:
-        print "broken!!!!!"
+        print("broken!!!!!")
     elif args.set_tracking_mode:
         telescope.set_tracking_mode(int(args.set_tracking_mode))
     elif args.goto_az_alt:
@@ -162,7 +162,7 @@ def main():
         else:
             print("No")
     elif args.get_model:
-        print telescope.get_model()
+        print(telescope.get_model())
     elif args.cancel_goto:
         telescope.cancel_goto()
     elif args.cancel_current_operation:
