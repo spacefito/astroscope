@@ -64,7 +64,7 @@ def main():
                             "telescope.")
     group.add_argument("--goto_az_alt", nargs=2, metavar=("az", "alt"),
                        help="Sets the azimuth and altitude of the "
-                            "telescope.")
+                            "telescope. --goto_az_alt float float")
     group.add_argument("--goto_in_progress", action="store_true",
                        help="reports back weather or not there is an "
                             "operation in progress on the telescope. "
@@ -143,8 +143,8 @@ def main():
     elif args.set_tracking_mode:
         telescope.set_tracking_mode(int(args.set_tracking_mode))
     elif args.goto_az_alt:
-        _alt = float(args.goto_az_alt[0])
-        _az = float(args.goto_az_alt[1])
+        _az = float(args.goto_az_alt[0])
+        _alt = float(args.goto_az_alt[1])
         telescope.goto_az_alt(_az, _alt)
     elif args.goto_in_progress:
         if telescope.goto_in_progress():
