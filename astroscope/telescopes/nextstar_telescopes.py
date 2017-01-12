@@ -12,7 +12,7 @@ class TelescopeCommand(object):
     _cmd = ""
 
 
-class NexStarSLT130(BaseTelescope ):
+class NexStarSLT130(BaseTelescope):
     time_format = 'isot'
 
     def __init__(self, device):
@@ -41,12 +41,25 @@ class NexStarSLT130(BaseTelescope ):
         return self.serial.read(n_bytes)
 
     @staticmethod
-    def _validate_command(response):
+    def _validate_response(response):
         """ Validates telescope received command
         
         Telescope acknowledges command is valid by returning the # sign
         """
         assert response == '#', 'Command failed'
+
+    def _send_command_and_validate_response(self, command, expected_response_length=0):
+        """ Sends command to telescope and validates the response
+
+        :param command: The command to send
+        :param expected_response_length: The expected length of the response in bytes
+
+        :return response: Response returned by telescope
+        """
+        self.send_command(command)
+        response = self.read_response(expected_response_length + 1)
+        self._validate_response(response)
+        return response
 
     @staticmethod
     def _convert_hex_to_percentage_of_revolution(string):
@@ -67,8 +80,7 @@ class NexStarSLT130(BaseTelescope ):
 
         :return : tuple with desired coordinates in the form of (ra, dec) or (az, alt)
         """
-        self.send_command(coordinate_system)
-        response = self.read_response(18)
+        response = self._send_command_and_validate_response(coordinate_system, 17)
         return (self._convert_hex_to_percentage_of_revolution(response[:8]),
                 self._convert_hex_to_percentage_of_revolution(response[9:17]))
 
@@ -97,9 +109,11 @@ class NexStarSLT130(BaseTelescope ):
         command = (char + self._convert_to_percentage_of_revolution_in_hex(
             values[0]) + ',' +
                    self._convert_to_percentage_of_revolution_in_hex(values[1]))
-        self.send_command(command)
-        response = self.read_response(1)
-        return "#" in response
+        try:
+            self._send_command_and_validate_response(command)
+        except:
+            return False
+        return True
 
     def goto_az_alt(self, az, alt):
         """ Points telescope to Horizontal coordinates (az, alt)
@@ -139,8 +153,7 @@ class NexStarSLT130(BaseTelescope ):
         
         :return string representing tracking mode
         """
-        self.send_command('t')
-        response = self.read_response(2)
+        response = self._send_command_and_validate_response('t', 1)
         return ord(response[0])
 
     def set_tracking_mode(self, mode):
@@ -148,9 +161,7 @@ class NexStarSLT130(BaseTelescope ):
         
         :param mode: integer representing desired tracking mode
         """
-        self.send_command('T' + chr(mode))
-        response = self.read_response(1)
-        self._validate_command(response)
+        self._send_command_and_validate_response('T' + chr(mode))
 
     def _var_slew_command(self, direction, rate):
         """ Sets the variable slew rate of telescope on given axis
@@ -167,9 +178,7 @@ class NexStarSLT130(BaseTelescope ):
         command = ('P' + chr(3) + direction_char + sign_char +
                    chr(track_rate_high) + chr(track_rate_low) + chr(0) +
                    chr(0))
-        self.send_command(command)
-        response = self.read_response(1)
-        self._validate_command(response)
+        self._send_command_and_validate_response(command)
 
     def slew_var(self, az_rate, el_rate):
         """ Sets the variable slew rate of telescope in Horizontal coordinates
@@ -194,9 +203,7 @@ class NexStarSLT130(BaseTelescope ):
         rate_char = chr(int(abs(rate)))
         command = ('P' + chr(2) + direction_char + sign_char + rate_char +
                    chr(0) + chr(0) + chr(0))
-        self.send_command(command)
-        response = self.read_response(1)
-        self._validate_command(response)
+        self._send_command_and_validate_response(command)
 
     def slew_fixed(self, az_rate, el_rate):
         """ Sets the fixed slew rate of telescope in Horizontal coordinates
@@ -227,14 +234,14 @@ class NexStarSLT130(BaseTelescope ):
 
         lat = ()
         for char in response[:4]:
-            lat = lat + (ord(char),)
+            lat += ord(char),
         _lat_degrees = lat[0] + (lat[1] / 60.0) + (lat[2] / (60.0 * 60.0))
         if lat[3] != 0:
             _lat_degrees *= -1.0
 
         _long = ()
         for char in response[4:-1]:
-            _long = _long + (ord(char),)
+            _long += ord(char),
         _long_degrees = _long[0] + (_long[1] / 60.0) + (
             _long[2] / (60.0 * 60.0))
         if _long[3] != 0:
@@ -253,9 +260,7 @@ class NexStarSLT130(BaseTelescope ):
             command += chr(p)
         for p in lon:
             command += chr(p)
-        self.send_command(command)
-        response = self.read_response(1)
-        self._validate_command(response)
+        self._send_command_and_validate_response(command)
 
     def _get_time(self):
         """ Reads time from telescope
@@ -266,7 +271,7 @@ class NexStarSLT130(BaseTelescope ):
         response = self.read_response(9)
         time = ()
         for char in response[:-1]:
-            time = time + (ord(char),)
+            time += ord(char),
         return time
 
     def get_time_initializer(self):
@@ -278,10 +283,10 @@ class NexStarSLT130(BaseTelescope ):
          _month, _day_of_month, _year,
          gmt_offset, _DAYLIGHT_SAVINGS_ENABLED) = self._get_time()
         date_string = "20" + str(_year).zfill(2) + "-" + \
-                      str(_month).zfill(2) + "-" +\
-                      str(_day_of_month).zfill(2) + "T" +\
-                      str(_hour).zfill(2) +\
-                      ":" + str(_minute).zfill(2) +\
+                      str(_month).zfill(2) + "-" + \
+                      str(_day_of_month).zfill(2) + "T" + \
+                      str(_hour).zfill(2) + \
+                      ":" + str(_minute).zfill(2) + \
                       ":" + str(_seconds).zfill(2)
         return date_string
 
@@ -293,17 +298,14 @@ class NexStarSLT130(BaseTelescope ):
         command = 'H'
         for p in time:
             command += chr(p)
-        self.send_command(command)
-        response = self.read_response(1)
-        self._validate_command(response)
+        self._send_command_and_validate_response(command)
 
     def get_version(self):
         """Gets telescope software version
         
         :return string representing software version
         """
-        self.send_command('V')
-        response = self.read_response(3)
+        response = self._send_command_and_validate_response('V', 2)
         return ord(response[0]) + ord(response[1]) / 10.0
 
     def get_model(self):
@@ -311,8 +313,7 @@ class NexStarSLT130(BaseTelescope ):
         
         :return string representing telescopes model
         """
-        self.send_command('m')
-        response = self.read_response(2)
+        response = self._send_command_and_validate_response('m', 1)
         return ord(response[0])
 
     def echo(self, x):
@@ -321,9 +322,7 @@ class NexStarSLT130(BaseTelescope ):
         :param x: message to be displayed
         :return response from telescope
         """
-        command = 'K' + chr(x)
-        self.send_command(command)
-        response = self.read_response(2)
+        response = self._send_command_and_validate_response('K' + chr(x), 1)
         return ord(response[0])
 
     def alignment_complete(self):
@@ -331,8 +330,7 @@ class NexStarSLT130(BaseTelescope ):
         
         :return True of alignment is complete, False otherwise
         """
-        self.send_command('J')
-        response = self.read_response(2)
+        response = self._send_command_and_validate_response('J', 1)
         return True if ord(response[0]) == 1 else False
 
     def goto_in_progress(self):
@@ -340,8 +338,7 @@ class NexStarSLT130(BaseTelescope ):
         
         :return True if there is a current "goto" in progress, False otherwise
         """
-        self.send_command('L')
-        response = self.read_response(2)
+        response = self._send_command_and_validate_response('L', 1)
         return True if int(response[0]) == 1 else False
 
     def cancel_goto(self):
@@ -350,9 +347,7 @@ class NexStarSLT130(BaseTelescope ):
         If there is a "goto" operation in progress on the telescope
         it is cancelled
         """
-        self.send_command('M')
-        response = self.read_response(1)
-        self._validate_command(response)
+        self._send_command_and_validate_response('M')
 
     def cancel_current_operation(self):
         """Cancels current operations on telescope"""
@@ -370,6 +365,5 @@ class NexStarSLT130(BaseTelescope ):
         
         :param altaz: astropy SkyCoordinate object representing the coordinates
         """
-        #TODO(spacefito): this needs to be moved to the local_telescope as it is dependent on astropy
+        # TODO(spacefito): this needs to be moved to the local_telescope as it is dependent on astropy
         self.goto_az_alt(altaz.az.deg, altaz.el.deg)
-

@@ -35,8 +35,8 @@ class TestNexStarSLT130(TestCase):
         self.assertEqual(mocked_response, response)
 
     def test__validate_command(self):
-        self.telescope._validate_command("#")
+        self.telescope._validate_response("#")
         self.assertRaises(AssertionError,
-                          self.telescope._validate_command,
+                          self.telescope._validate_response,
                           "This should fail"
                           )
