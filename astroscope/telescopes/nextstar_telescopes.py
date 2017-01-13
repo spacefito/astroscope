@@ -46,7 +46,7 @@ class NexStarSLT130(BaseTelescope):
         
         Telescope acknowledges command is valid by returning the # sign
         """
-        assert response == '#', 'Command failed'
+        assert response[-1] == '#', 'NexStarSLT130 did not respond'
 
     def _send_command_and_validate_response(self, command, expected_response_length=0):
         """ Sends command to telescope and validates the response
