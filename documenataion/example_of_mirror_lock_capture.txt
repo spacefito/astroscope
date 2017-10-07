@@ -1,1 +1,5 @@
+ #simple camera snapshot
  gphoto2 --set-config capturetarget=0 --set-config drivemode=0 --set-config eosviewfinder=0 --set-config output=1 --set-config autofocusdrive=0 --filename test.jpg --wait-event=4s --capture-image
+ 
+ #bulb exposure with mirror lock
+ gphoto2 --set-config capturetarget=0  --set-config autoexposuremode=Bulb --set-config capturetarget=0 --set-config eosremoterelease=2 --set-config eosremoterelease=4 --wait-event=10s --set-config eosremoterelease=2 --wait-event=5s --set-config eosremoterelease=4 --set-config eosremoterelease=0 --capture-tethered=2s --wait-event-and-download=10s
