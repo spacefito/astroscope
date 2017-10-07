@@ -1,0 +1,2 @@
+repo with sles12 aarch64 (raspberry pi) 
+zypper ar https://download.opensuse.org/repositories/home:/rdannert:/aarch64-based_on_42.2/SLE_12_SP2_linked/ sle12aarch64
