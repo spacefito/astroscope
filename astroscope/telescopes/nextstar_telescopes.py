@@ -1,6 +1,6 @@
 import serial
 
-from base_telescope import BaseTelescope
+from astroscope.telescopes.base_telescope import BaseTelescope
 
 
 class TelescopeError(Exception):
@@ -29,7 +29,7 @@ class NexStarSLT130(BaseTelescope):
                     must asure cmd is valid and validate response 
                     if necessary
         """
-        self.serial.write(cmd)
+        self.serial.write(cmd.encode())
 
     def read_response(self, n_bytes=1):
         """ Reads response from telescope
@@ -46,7 +46,8 @@ class NexStarSLT130(BaseTelescope):
         
         Telescope acknowledges command is valid by returning the # sign
         """
-        assert response[-1] == '#', 'NexStarSLT130 did not respond'
+        assert response[-1] == 35, 'NexStarSLT130 did not respond'
+        # 35 is the byte value for "#"
 
     def _send_command_and_validate_response(self, command, expected_response_length=0):
         """ Sends command to telescope and validates the response
@@ -154,7 +155,7 @@ class NexStarSLT130(BaseTelescope):
         :return string representing tracking mode
         """
         response = self._send_command_and_validate_response('t', 1)
-        return ord(response[0])
+        return response[0]
 
     def set_tracking_mode(self, mode):
         """ Sets tracking mode on telescope
@@ -234,14 +235,14 @@ class NexStarSLT130(BaseTelescope):
 
         lat = ()
         for char in response[:4]:
-            lat += ord(char),
+            lat += char,
         _lat_degrees = lat[0] + (lat[1] / 60.0) + (lat[2] / (60.0 * 60.0))
         if lat[3] != 0:
             _lat_degrees *= -1.0
 
         _long = ()
         for char in response[4:-1]:
-            _long += ord(char),
+            _long += char,
         _long_degrees = _long[0] + (_long[1] / 60.0) + (
             _long[2] / (60.0 * 60.0))
         if _long[3] != 0:
@@ -271,7 +272,7 @@ class NexStarSLT130(BaseTelescope):
         response = self.read_response(9)
         time = ()
         for char in response[:-1]:
-            time += ord(char),
+            time += char,
         return time
 
     def get_time_initializer(self):
@@ -306,7 +307,7 @@ class NexStarSLT130(BaseTelescope):
         :return string representing software version
         """
         response = self._send_command_and_validate_response('V', 2)
-        return ord(response[0]) + ord(response[1]) / 10.0
+        return response[0] + response[1] / 10.0
 
     def get_model(self):
         """Gets telescope model
@@ -314,7 +315,7 @@ class NexStarSLT130(BaseTelescope):
         :return string representing telescopes model
         """
         response = self._send_command_and_validate_response('m', 1)
-        return ord(response[0])
+        return response[0]
 
     def echo(self, x):
         """Displays message on telescopes LCD
@@ -323,7 +324,7 @@ class NexStarSLT130(BaseTelescope):
         :return response from telescope
         """
         response = self._send_command_and_validate_response('K' + chr(x), 1)
-        return ord(response[0])
+        return response[0]
 
     def alignment_complete(self):
         """ Checks to see if the telescope alignement is complete
@@ -331,7 +332,7 @@ class NexStarSLT130(BaseTelescope):
         :return True of alignment is complete, False otherwise
         """
         response = self._send_command_and_validate_response('J', 1)
-        return True if ord(response[0]) == 1 else False
+        return True if response[0] == 1 else False
 
     def goto_in_progress(self):
         """Checks to see if there is a "goto" operation in progress on telescope
