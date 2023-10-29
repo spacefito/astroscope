@@ -1,16 +1,18 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import argparse
-import os
+
 
 import astroscope.telescopes.nextstar_telescopes
 
 
 def main():
+    print("byte me")
     parser = argparse.ArgumentParser()
-    group = parser.add_mutually_exclusive_group()
+    #group = parser.add_mutually_exclusive_group()
+    group = parser.add_argument_group()
     group.add_argument("-d",
                        help="Port telescope is connected to."
-                            "Default = /dev/tty.usbserial-14140")
+                            "Default = /dev/ttyUSB0")
     group.add_argument("--get_azalt", action="store_true",
                        help="Display the current values of the telescope's "
                             "Aziumth (as) and Altitude (alt) obtained by "
@@ -53,7 +55,7 @@ def main():
     group.add_argument("--get_tracking_mode", action="store_true",
                        help="Displays the tracking mode value reported"
                             " by the telescope.")
-    group.add_argument("--get_version", action="store_true",
+    group.add_argument("-v","--get_version", action="store_true",
                        help="Displays the software version of the"
                             "telescope.")
     group.add_argument("--set_location", nargs=2,
@@ -92,10 +94,7 @@ def main():
     if args.d:
         device = args.d
     else:
-        if "TELESCOPE" in os.environ:
-            device = os.getenv('TELESCOPE')
-        else:
-            device = '/dev/tty.usbserial-14140'
+        device = '/dev/ttyUSB0'
 
     telescope = astroscope.telescopes.nextstar_telescopes.NexStarSLT130(device)
 
