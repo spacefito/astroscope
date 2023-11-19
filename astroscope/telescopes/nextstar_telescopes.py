@@ -154,7 +154,7 @@ class NexStarSLT130(BaseTelescope):
         :return string representing tracking mode
         """
         response = self._send_command_and_validate_response('t', 1)
-        return response[0]
+        return response[0] #TODO(adduarte) need to verify this
 
     def set_tracking_mode(self, mode):
         """ Sets tracking mode on telescope

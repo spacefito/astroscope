@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 import argparse
+import math
 import os
 
 import astroscope.telescopes.nextstar_telescopes
 
+def correct_degrees(x):
+    if os.getenv("ASTRAZCORRECTION"):
+        az_correction = float(os.getenv("ASTRAZCORRECTION"))
+    else:
+        az_correction = float(0)
+    return (x + az_correction) % 360
 
 def main():
     parser = argparse.ArgumentParser()
@@ -12,7 +19,7 @@ def main():
     group.add_argument("-d",
                        help="Port telescope is connected to."
                             "Default = /dev/ttyUSB0. Overiden by ASTRPORT"
-                            "environmental variable")
+                            " environmental variable")
     group.add_argument("--get_azalt", action="store_true",
                        help="Display the current values of the telescope's "
                             "Aziumth (as) and Altitude (alt) obtained by "
@@ -99,6 +106,9 @@ def main():
     if os.getenv("ASTRPORT"):
         device = os.getenv("ASTRPORT")
 
+
+
+
     telescope = astroscope.telescopes.nextstar_telescopes.NexStarSLT130(device)
 
     if args.get_ra_dec:
@@ -111,7 +121,12 @@ def main():
         print("alt: " + telescope.dec_to_degrees(_altaz.alt.deg))
         print(" az: " + telescope.dec_to_degrees(_altaz.az.deg))
     elif args.get_az_alt:
-        print (telescope.get_az_alt())
+        answer_tuple = telescope.get_az_alt()
+        new_az = correct_degrees(answer_tuple[0])
+        new_alt = answer_tuple[1]
+        new_tuple = (new_az, new_alt)
+        print(new_tuple)
+
     elif args.get_location:
         _earth_location = telescope.get_earth_location()
         print(
@@ -143,7 +158,7 @@ def main():
     elif args.set_tracking_mode:
         telescope.set_tracking_mode(int(args.set_tracking_mode))
     elif args.goto_az_alt:
-        _az = float(args.goto_az_alt[0])
+        _az = correct_degrees(float(args.goto_az_alt[0]))
         _alt = float(args.goto_az_alt[1])
         telescope.goto_az_alt(_az, _alt)
     elif args.goto_in_progress:
@@ -163,7 +178,7 @@ def main():
     elif args.cancel_current_operation:
         telescope.cancel_current_operation()
     elif args.echo:
-        telescope.echo(args.echo)
+        telescope.echo(1)
     elif args.slew_fixed:
         _az_rate = float(args.slew_fixed[0])
         _el_rate = float(args.slew_fixed[1])
