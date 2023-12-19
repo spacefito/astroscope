@@ -137,9 +137,7 @@ def main():
         answer_tuple = telescope.get_az_alt()
         new_az = correct_degrees(answer_tuple[0], _az_correction)
         new_alt = answer_tuple[1]
-        new_tuple = (convert_to_degree_seconds(new_az),
-                     convert_to_degree_seconds(new_alt)
-                     )
+        new_tuple = (new_az, new_alt)
         print(new_tuple)
 
     elif args.get_location:
