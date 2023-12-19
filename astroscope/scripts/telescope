@@ -5,12 +5,20 @@ import os
 
 import astroscope.telescopes.nextstar_telescopes
 
-def correct_degrees(x):
-    if os.getenv("ASTRAZCORRECTION"):
-        az_correction = float(os.getenv("ASTRAZCORRECTION"))
-    else:
-        az_correction = float(0)
-    return (x + az_correction) % 360
+
+def correct_degrees(x, az_correction):
+    return (x + float(az_correction)) % 360
+
+
+def convert_to_degree_seconds(degree_decimal):
+    degrees = int(degree_decimal)
+    minute_fraction = degree_decimal - float(degrees)
+    minutes_decimal = minute_fraction*60.0
+    minutes = int(minutes_decimal)
+    second_fraction = minutes_decimal - float(minutes)
+    second_decimal = second_fraction*60.0
+    seconds = int(second_decimal)
+    return "{}:{}:{}".format(str(degrees), str(minutes), str(seconds))
 
 def main():
     parser = argparse.ArgumentParser()
@@ -106,6 +114,11 @@ def main():
     if os.getenv("ASTRPORT"):
         device = os.getenv("ASTRPORT")
 
+    if os.getenv("AZCORRECTION"):
+        _az_correction = os.getenv("AZCORRECTION")
+    else:
+        _az_correction = 0.0
+
 
 
 
@@ -122,9 +135,11 @@ def main():
         print(" az: " + telescope.dec_to_degrees(_altaz.az.deg))
     elif args.get_az_alt:
         answer_tuple = telescope.get_az_alt()
-        new_az = correct_degrees(answer_tuple[0])
+        new_az = correct_degrees(answer_tuple[0], _az_correction)
         new_alt = answer_tuple[1]
-        new_tuple = (new_az, new_alt)
+        new_tuple = (convert_to_degree_seconds(new_az),
+                     convert_to_degree_seconds(new_alt)
+                     )
         print(new_tuple)
 
     elif args.get_location:
@@ -158,7 +173,7 @@ def main():
     elif args.set_tracking_mode:
         telescope.set_tracking_mode(int(args.set_tracking_mode))
     elif args.goto_az_alt:
-        _az = correct_degrees(float(args.goto_az_alt[0]))
+        _az = correct_degrees(float(args.goto_az_alt[0]), _az_correction)
         _alt = float(args.goto_az_alt[1])
         telescope.goto_az_alt(_az, _alt)
     elif args.goto_in_progress:
