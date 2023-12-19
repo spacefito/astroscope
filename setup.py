@@ -5,6 +5,6 @@ setup(name='astroscope',
                 'astroscope.cameras',
                 'astroscope.computers',
                 'astroscope.telescopes'],
-      scripts=['astroscope/scripts/astroscope', 'astroscope/scripts/telescope']
+      scripts=['astroscope/scripts/astroscope', 'telescope']
       )
 

@@ -63,14 +63,14 @@ class NexStarSLT130(BaseTelescope):
         return response
 
     @staticmethod
-    def _convert_hex_to_percentage_of_revolution(string):
-        """ Converts 32 bit hex to percentage of 360 degrees """
-        return int(string, 16) / 2. ** 32 * 360.
+    def _convert_hex_percentage_of_revolution_to_degrees(string):
+        """ Converts 32 bit hex percentage of 360 to  degrees """
+        return int(string, 16) / (2 ** 32) * 360.
 
     @staticmethod
-    def _convert_to_percentage_of_revolution_in_hex(degrees):
-        """ Coverts percentage of 360 degree revolution to hex """
-        rounded = round(degrees / 360. * 2. ** 32)
+    def _convert_degrees_to_percentage_of_revolution_in_hex(degrees):
+        """ Coverts degree to  percentage of 360 degree revolution in hex"""
+        rounded = round(degrees / 360. * (2 ** 32))
         return '%08X' % rounded
 
     def _get_position(self, coordinate_system):
@@ -82,8 +82,8 @@ class NexStarSLT130(BaseTelescope):
         :return : tuple with desired coordinates in the form of (ra, dec) or (az, alt)
         """
         response = self._send_command_and_validate_response(coordinate_system, 17)
-        return (self._convert_hex_to_percentage_of_revolution(response[:8]),
-                self._convert_hex_to_percentage_of_revolution(response[9:17]))
+        return (self._convert_hex_percentage_of_revolution_to_degrees(response[:8]),
+                self._convert_hex_percentage_of_revolution_to_degrees(response[9:17]))
 
     def get_az_alt(self):
         """ Returns Horizontal coordinates telescope is pointing to
@@ -107,14 +107,15 @@ class NexStarSLT130(BaseTelescope):
                      
         :return boolean: True - command was received by telescope. False - command failed.
         """
-        command = (char + self._convert_to_percentage_of_revolution_in_hex(
+        command = (char + self._convert_degrees_to_percentage_of_revolution_in_hex(
             values[0]) + ',' +
-                   self._convert_to_percentage_of_revolution_in_hex(values[1]))
+                   self._convert_degrees_to_percentage_of_revolution_in_hex(values[1]))
+        response = ""
         try:
-            self._send_command_and_validate_response(command)
+            response = self._send_command_and_validate_response(command)
         except:
             return False
-        return True
+        return response
 
     def goto_az_alt(self, az, alt):
         """ Points telescope to Horizontal coordinates (az, alt)
@@ -141,11 +142,9 @@ class NexStarSLT130(BaseTelescope):
     def sync(self, ra, dec):
         """Sets sync on telescope to given spherical coordinates
         
-        :param  ra: Right ascention expressed as a hex string equal
-                    to the percentage of a 360 degree circle
+        :param  ra: Right ascention in degrees
                     
-        :param dec: Declination expressed as a hex string equal
-                    to the percentage of a 360 degree circle
+        :param dec: Declination expressed in degrees
         """
         self._goto_command('s', (ra, dec))
 
@@ -155,7 +154,7 @@ class NexStarSLT130(BaseTelescope):
         :return string representing tracking mode
         """
         response = self._send_command_and_validate_response('t', 1)
-        return response[0]
+        return response[0] #TODO(adduarte) need to verify this
 
     def set_tracking_mode(self, mode):
         """ Sets tracking mode on telescope
