@@ -95,7 +95,7 @@ def main():
     group.add_argument("--cancel_current_operation", action="store_true",
                        help="Cancels any operation the telescope is "
                             "currently executing.")
-    group.add_argument("--alignment_complete", action="store_true",
+    group.add_argument("-ac", "--alignment_complete", action="store_true",
                        help="Reports back weather or not the telescope "
                             "is aligned.")
     group.add_argument("--echo", help="Displays provided text on "
